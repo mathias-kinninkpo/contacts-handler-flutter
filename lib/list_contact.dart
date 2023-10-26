@@ -18,7 +18,6 @@ class _listContactState extends State<listContact> {
   _loadContacts() async {
 
     setState(() async {
-      _databaseService.open();
       _contacts = await _databaseService.getAllContact();
     });
   }
