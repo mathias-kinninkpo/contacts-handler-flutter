@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 
 void main() async {
+  // Initialize the database factory
+  databaseFactory = databaseFactoryFfi;
 
-  // Run the app.
+  // Open the database
+  //final database = await openDatabase('my_database.db');
+
+  // ...
   runApp(MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

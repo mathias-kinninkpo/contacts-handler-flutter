@@ -36,40 +36,53 @@ class Contact {
 
 class ContactProvider {
 
-  bool isInitialized = false;
-  Database? db;
+
+  static final ContactProvider _instance = ContactProvider._internal();
+
+  factory ContactProvider() {
+    return _instance;
+  }
 
 
 
 
+  static Database? db;
+  ContactProvider._internal();
 
-  Future<Database> open() async {
+  Future<Database?> get open async {
 
     WidgetsFlutterBinding.ensureInitialized();
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'demo.db');
 
-    return await openDatabase(path, version: 1,
-        onCreate: (Database db, int version) async {
-          await db.execute('''
+    if(db == null){
+      db = await openDatabase(path, version: 1,
+          onCreate: (Database db, int version) async {
+            await db.execute('''
             create table $tableContact ( 
             $columnId integer primary key autoincrement, 
             $columnFullName varchar(255) not null,
             $columnPhone varchar(255) not null)
           ''');
-    });
+          });
+      return db ;
+    }
+    else{
+      return db;
+    }
+
   }
 
   Future<Contact> insert(Contact contact) async {
-    db = await open();
+    db = await open;
     contact.id = await db!.insert(tableContact, contact.toMap());
     await close();
     return contact;
   }
 
   Future<Contact?> getContact(int id) async {
-    db = await open();
+    db = await open;
     List<Map> maps = await db!.query(tableContact,
         columns: [columnId, columnPhone, columnFullName],
         where: '$columnId = ?',
@@ -81,9 +94,9 @@ class ContactProvider {
   }
   Future<List<Contact>> getAllContact() async {
     List<Contact> contacts = [];
-    db = await open();
+    db = await open;
     List<Map> maps = await db!.query(tableContact,
-        columns: [columnId, columnPhone, columnFullName],
+      columns: [columnId, columnPhone, columnFullName],
     );
     await close();
     if (maps.length > 0) {
@@ -95,13 +108,14 @@ class ContactProvider {
   }
 
   Future<int> delete(int id) async {
-    db = await open();
+    db = await open;
     int result = await db!.delete(tableContact, where: '$columnId = ?', whereArgs: [id]);
     await close();
     return result;
   }
 
   Future<int> update(Contact contact) async {
+    db = await open;
     int result = await db!.update(tableContact, contact.toMap(),
         where: '$columnId = ?', whereArgs: [contact.id]);
     await close();
