@@ -16,9 +16,9 @@ class _listContactState extends State<listContact> {
   ContactProvider _databaseService = new ContactProvider();
 
   _loadContacts() async {
-
-    setState(() async {
-      _contacts = await _databaseService.getAllContact();
+    var contacts = await _databaseService.getAllContact();
+    setState(() {
+      _contacts = contacts ;
     });
   }
   @override
@@ -52,23 +52,49 @@ class _listContactState extends State<listContact> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
                       TextButton(
-                          onPressed: () async {
-                            await _databaseService.delete(_contacts[index].id!);
-                            _contacts = await _databaseService.getAllContact();
-                            setState(() {
-                              Fluttertoast.showToast(
-                                  msg: "Le contact a été supprimé avec succès",
-                                toastLength: Toast.LENGTH_LONG,
-                                gravity: ToastGravity.BOTTOM
+                        onPressed: () {
+                          // Afficher un dialogue de confirmation
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Confirmation de suppression"),
+                                content: Text("Voulez-vous vraiment supprimer ce contact ?"),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text("Annuler"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Fermer le dialogue
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text("Confirmer"),
+                                    onPressed: () async {
+                                      // Supprimer le contact
+                                      await _databaseService.delete(_contacts[index].id!);
+                                      _contacts = await _databaseService.getAllContact();
+                                      setState(() {
+                                        Fluttertoast.showToast(
+                                          msg: "Le contact a été supprimé avec succès",
+                                          toastLength: Toast.LENGTH_LONG,
+                                          gravity: ToastGravity.BOTTOM,
+                                        );
+                                      });
+                                      Navigator.of(context).pop(); // Fermer le dialogue après la suppression
+                                    },
+                                  ),
+                                ],
                               );
-                            });
-                          },
-                          child: Text("SUPPRIMER")
+                            },
+                          );
+                        },
+                        child: Text("SUPPRIMER"),
                       ),
+
                       const SizedBox(width: 8,),
                       TextButton(
                           onPressed: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SecondPage()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => SecondPage(contactId: _contacts[index].id!)));
                           },
                           child: Text("detaille")
                       ),
