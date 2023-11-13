@@ -1,7 +1,7 @@
 import 'package:contact_project/sqlite/contact.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'list_contact.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'sqlite/contact.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -73,6 +73,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     contact.fullName = fullnameController.text;
                     contact.phone = contactController.text;
                     contactProvider.insert(contact);
+                    setState(() {
+                      Fluttertoast.showToast(
+                          msg: "Le contact a été enregistré avec succès",
+                          toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.BOTTOM
+                      );
+                    });
                   }
               },
               child: Text("Enregistrer", style: TextStyle(color: Colors.green),)

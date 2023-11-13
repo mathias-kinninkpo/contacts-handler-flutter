@@ -1,6 +1,5 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:flutter/widgets.dart';
 
 
 final String databaseName = 'demo.db';
@@ -36,22 +35,10 @@ class Contact {
 
 class ContactProvider {
 
-
-  static final ContactProvider _instance = ContactProvider._internal();
-
-  factory ContactProvider() {
-    return _instance;
-  }
-
-
-
-
   static Database? db;
-  ContactProvider._internal();
 
   Future<Database?> get open async {
 
-    WidgetsFlutterBinding.ensureInitialized();
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'demo.db');
@@ -77,20 +64,18 @@ class ContactProvider {
   Future<Contact> insert(Contact contact) async {
     db = await open;
     contact.id = await db!.insert(tableContact, contact.toMap());
-    await close();
     return contact;
   }
 
-  Future<Contact?> getContact(int id) async {
+  Future<Contact> getContact(int id) async {
     db = await open;
     List<Map> maps = await db!.query(tableContact,
         columns: [columnId, columnPhone, columnFullName],
         where: '$columnId = ?',
         whereArgs: [id]);
-    if (maps.length > 0) {
-      return Contact.fromMap(maps.first);
-    }
-    return null;
+    //if (maps.length > 0) {
+        return Contact.fromMap(maps.first);
+    //}
   }
   Future<List<Contact>> getAllContact() async {
     List<Contact> contacts = [];
@@ -98,7 +83,6 @@ class ContactProvider {
     List<Map> maps = await db!.query(tableContact,
       columns: [columnId, columnPhone, columnFullName],
     );
-    await close();
     if (maps.length > 0) {
       maps.forEach((element) {
         contacts.add(Contact.fromMap(element));
@@ -110,7 +94,6 @@ class ContactProvider {
   Future<int> delete(int id) async {
     db = await open;
     int result = await db!.delete(tableContact, where: '$columnId = ?', whereArgs: [id]);
-    await close();
     return result;
   }
 
@@ -118,7 +101,6 @@ class ContactProvider {
     db = await open;
     int result = await db!.update(tableContact, contact.toMap(),
         where: '$columnId = ?', whereArgs: [contact.id]);
-    await close();
     return result;
   }
 
